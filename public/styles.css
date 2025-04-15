@@ -1,0 +1,129 @@
+body {
+    height: 100vh;
+}
+
+.desktop{
+    background-image: url('./images/bg.webp');
+    background-position: center;
+    background-size: cover;
+}
+
+.desktop .app{
+    width: 465px;
+    height: 637px;
+    background-color: #D2D1D1;
+}
+
+.app .bar{
+    height: 35px;
+    background: linear-gradient(to bottom, #0078d7, #0054a6);
+}
+
+.app .game-score{
+    height: 104px;;
+    border: 3px solid #A7A5A5;
+    width: 90%;
+}
+
+.game-score .score-game, .time-game{
+    background-color: black;
+    height: 48px;
+    width: 85px;
+    font-size: 40px;
+}
+
+.tile{
+    height: 83px;
+    width: 83px;
+    background-color: #D2D1D1;
+    cursor: pointer;
+    box-shadow: inset 12.62px 10.52px 8.42px 0px rgba(253,252,252,0.6), inset -10.52px -10.52px 8.42px 0px rgba(0,0,0,0.55);;
+}
+
+.app .board-game{
+    width: 90%;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+
+.taskbar{
+    height: 40px;
+    background-color: #245DDB; 
+    background: linear-gradient(to bottom, #0078d7, #0054a6);
+    border-top: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.taskbar .start-button{
+    background: linear-gradient(to bottom, #00b140, #007d2a);
+    border-radius: 4px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    clip-path: circle(100% at 20% 50%);
+    width: 180px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: white;
+    background: linear;
+    cursor: default;
+
+}
+
+.start-button div{
+    margin-left: -30px;
+}
+
+.time{
+    margin-left: auto;
+    margin-right: 10px;
+    color: white;
+    font-family: Tahoma, sans-serif;
+    font-size: 12px;
+}
+
+
+.taskbar .minesweeper{
+    background-color: #3980F4;
+    width: 234px;
+    border-radius: 4px;
+    border: 0.5px solid rgba(35, 77, 157, 0.5);
+    color: white;
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    font-weight: 200;
+    cursor: default;
+    box-shadow: 2px 0px 2px 0px rgba(0,0,0,0.2);
+    box-shadow: inset -2px -2px 2px 0px rgba(0,0,0,0.1);
+    box-shadow: 0px -4px 8px 0px rgba(255, 255, 255, 0.2);
+    box-shadow: inset 1.5px 1.5px 1px 0px rgba(255,255,255,0.25);
+}
+
+.minesweeper span{
+    margin-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+    .taskbar .start-button{
+        width: 80px;
+    }
+
+    .start-button div{
+        margin-left: 0;
+    }
+
+    .taskbar .minesweeper{
+        width: 180px;
+        margin-left: 10px;;
+    }
+
+    .desktop .app{
+        width: 265px;
+        height: 420px;
+    }
+
+    .tile{
+        height: 43px;
+        width: 43px;
+    }
+    
+}
