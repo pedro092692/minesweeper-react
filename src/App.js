@@ -2,7 +2,9 @@ import logo from './logo.svg';
 import './App.css';
 import Cell from './components/cell';
 import Time from './components/time';
+import NewGame from './components/newGame';
 import { useState, useEffect } from 'react';
+
 
   // initialize board values
   
@@ -27,13 +29,22 @@ function App() {
  
     return newBoard;
   }
+  
   const [board, setBoard] = useState(initialBoard);
-  console.log(board);
+  const [icon, setIcon] = useState("😊");
+
+  const handleMouseDown = () => {
+    setIcon("😱");
+  }
+
+  const handleMouseUp = () => {
+    setIcon("😊");
+  }
 
 
   const cells = board.map((row, rowIndex) => {
     return row.map((cell, cellIndex) => {
-      return <Cell key={`${rowIndex}-${cellIndex}`} id={`${rowIndex}-${cellIndex}`} value={cell.value} />
+      return <Cell key={`${rowIndex}-${cellIndex}`} id={`${rowIndex}-${cellIndex}`} value={cell.value} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} />
     })
   }) 
 
@@ -61,7 +72,7 @@ function App() {
           000
         </div>
         <div className="tile d-flex justify-content-center align-items-center fs-4">
-          <button className='bg-transparent border-0'>😊</button>
+          <NewGame icon={icon}/>
         </div>
         <Time />
       </div>
