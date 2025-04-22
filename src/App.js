@@ -26,12 +26,30 @@ function App() {
         minesPlaced++;
       }
     }
+
+    // calculate adjacent mines
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLUMNS; col++) {
+        if (!newBoard[row][col].hasMine) {
+          let mineCount = 0;
+          for (let r = row - 1; r <= row + 1; r++) {
+            for (let c = col - 1; c <= col + 1; c++) {
+              if (r >= 0 && r < ROWS && c >= 0 && c < COLUMNS && newBoard[r][c].hasMine) {
+                mineCount++;
+              }
+            }
+          }
+          newBoard[row][col] = { ...settings, value: mineCount > 0 ? mineCount : " " };
+        }
+      }
+    }
  
     return newBoard;
   }
   
-  const [board, setBoard] = useState(initialBoard);
+  const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(" ")));
   const [icon, setIcon] = useState("😊");
+  const [isGameStarted, setIsGameStarted] = useState(false);
 
   const handleMouseDown = () => {
     setIcon("😱");
@@ -41,23 +59,29 @@ function App() {
     setIcon("😊");
   }
 
+  const handleClickCell = () => {
+    if (!isGameStarted) {
+      setBoard(initialBoard())
+      setIsGameStarted(true);
+    }
+  }
+
+  const handleNewGame = () => {
+    setIsGameStarted(false);
+  }
 
   const cells = board.map((row, rowIndex) => {
     return row.map((cell, cellIndex) => {
-      return <Cell key={`${rowIndex}-${cellIndex}`} id={`${rowIndex}-${cellIndex}`} value={cell.value} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} />
+      return <Cell 
+        key={`${rowIndex}-${cellIndex}`} 
+        id={`${rowIndex}-${cellIndex}`} 
+        value={cell.value} 
+        onMouseDown={handleMouseDown} 
+        onMouseUp={handleMouseUp} 
+        onClickCell={ handleClickCell }
+      />
     })
   }) 
-
-  const handleNewGame = () => {
-    setBoard(initialBoard);
-  }
-
-
-  // const showValue = (index) => {
-  //   const newValuesMap = [...valuesMap];
-  //   newValuesMap[index] = values[index];
-  //   setValuesMap(newValuesMap);
-  // }
 
   return (
     <div className="app d-flex flex-column rounded-top align-items-center gap-4">
@@ -73,7 +97,7 @@ function App() {
         <div className="tile d-flex justify-content-center align-items-center fs-4">
           <NewGame icon={icon} newGame={ handleNewGame }/>
         </div>
-        <Time />
+        <Time isGameStarted={ isGameStarted }/>
       </div>
 
       <div className="board-game">

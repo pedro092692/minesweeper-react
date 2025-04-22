@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 
-export default function Time({isGameStarted}) {
-    const [seconds, setSeconds] = useState(0);
-
+export default function Time({ isGameStarted, time }) {
+    const [seconds, setSeconds] = useState(0); // Initialize seconds to 0
+    
     useEffect(() => {
-        if (!isGameStarted){
-          setSeconds(0);
-          return
+        // Start the timer when the game starts
+        if (!isGameStarted) {
+          setSeconds(0); 
+          return;
         }
         const intervalId = setInterval(() => {
           setSeconds(seconds => seconds + 1); 
         }, 1000)
         return () => clearInterval(intervalId);
-      }, [seconds]); 
+      }, [isGameStarted]); 
 
      
     return (
@@ -21,3 +22,4 @@ export default function Time({isGameStarted}) {
         </div>
     );
 }
+
