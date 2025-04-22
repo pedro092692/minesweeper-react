@@ -51,6 +51,7 @@ function App() {
   const [icon, setIcon] = useState("😊");
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [mines, setMines] = useState(NUM_MINES);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const handleMouseDown = () => {
     setIcon("😱");
@@ -80,7 +81,7 @@ function App() {
 
   const handleClickCell = (cellIndex, rowIndex) => {
     // check if cell is already revealed or flagged
-    if (board[rowIndex][cellIndex].revealed || board[rowIndex][cellIndex].flagged) {
+    if (board[rowIndex][cellIndex].revealed || board[rowIndex][cellIndex].flagged || isGameOver) {
       return;
     }
     // check if game is already started
@@ -101,8 +102,6 @@ function App() {
       // check if cell has mine
       if (newBoard[rowIndex][cellIndex].hasMine) {
         setIcon("😭");
-        alert("Game Over!");
-        setIsGameStarted(false);
         // revealed all mines
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLUMNS; c++) {
@@ -112,6 +111,8 @@ function App() {
             }
           }
         }
+        
+        setIsGameOver(true)
         setBoard(newBoard);
         return;
       }
@@ -120,10 +121,13 @@ function App() {
     }    
   }
 
-
-
   const handleNewGame = () => {
-    setIsGameStarted(false);
+    if (isGameOver) {
+      setIcon("😊");
+      setIsGameStarted(false);
+      setIsGameOver(false);
+      setBoard(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
+    }
   }
 
   const cells = board.map((row, rowIndex) => {
@@ -155,7 +159,7 @@ function App() {
         <div className="tile d-flex justify-content-center align-items-center fs-4">
           <NewGame icon={icon} newGame={ handleNewGame }/>
         </div>
-        <Time isGameStarted={ isGameStarted }/>
+        <Time isGameStarted={ isGameStarted } isGameOver={isGameOver} />
       </div>
 
       <div className="board-game">

@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
 
-export default function Time({ isGameStarted, time }) {
+export default function Time({ isGameStarted, isGameOver }) {
     const [seconds, setSeconds] = useState(0); // Initialize seconds to 0
     
     useEffect(() => {
-        // Start the timer when the game starts
+        // reset the timer when the game is reset
         if (!isGameStarted) {
-          setSeconds(0); 
-          return;
+          setSeconds(0);
+          return () => {}; 
         }
+        // Stop timer when the game is not started
+        if (isGameOver) {
+          return () => {};
+        }
+        // Start the timer when the game starts
         const intervalId = setInterval(() => {
           setSeconds(seconds => seconds + 1); 
         }, 1000)
         return () => clearInterval(intervalId);
-      }, [isGameStarted]); 
+      }, [isGameStarted, isGameOver]); 
 
      
     return (

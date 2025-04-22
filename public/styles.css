@@ -55,7 +55,15 @@ body {
     border: 1px solid #afafaf;
 }
 
+.revealed:hover{
+    background-color: #a1a0a0;
+}
+
 .mine{
+    background-color: #f0c0c0;
+}
+
+.mine:hover{
     background-color: #f0c0c0;
 }
 
