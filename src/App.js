@@ -3,10 +3,8 @@ import './App.css';
 import Cell from './components/cell';
 import Time from './components/time';
 import NewGame from './components/newGame';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-
-  // initialize board values
   
 function App() {
   //define components values and props
@@ -14,14 +12,16 @@ function App() {
   const COLUMNS = 5;
   const NUM_MINES = 3;
   const settings = { value: " ", revealed: false, flagged: false, hasMine: false };
+  
 
+  // initialize board values
   const initialBoard = (cellIndex, rowIndex) => {
-    const newBoard = Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings}));
+    const newBoard = Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(" "));
     let minesPlaced = 0;
     while (minesPlaced < NUM_MINES) {
       const row = Math.floor(Math.random() * ROWS);
       const col = Math.floor(Math.random() * COLUMNS);
-      if (!newBoard[row][col].hasMine && row !== cellIndex && col !== rowIndex) {
+      if (!newBoard[row][col].hasMine && row !== rowIndex && col !== cellIndex) {
         newBoard[row][col] = { ...settings, hasMine: true, value: "💣" };
         minesPlaced++;
       }
@@ -39,7 +39,7 @@ function App() {
               }
             }
           }
-          newBoard[row][col] = { ...settings, value: mineCount > 0 ? mineCount : " " };
+          newBoard[row][col] = { ...settings, value: mineCount > 0 && mineCount, revealed: mineCount > 0 && true};
         }
       }
     }
@@ -47,7 +47,7 @@ function App() {
     return newBoard;
   }
   
-  const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(" ")));
+  const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
   const [icon, setIcon] = useState("😊");
   const [isGameStarted, setIsGameStarted] = useState(false);
 
@@ -60,11 +60,27 @@ function App() {
   }
 
   const handleClickCell = (cellIndex, rowIndex) => {
-    if (!isGameStarted) {
-      setBoard(initialBoard(rowIndex, cellIndex))
-      setIsGameStarted(true);
+    // check if cell is already revealed or flagged
+    if (board[rowIndex][cellIndex].revealed || board[rowIndex][cellIndex].flagged) {
+      return;
     }
+    // check if game is already started
+    if (!isGameStarted) {
+      const newBoard = initialBoard(cellIndex, rowIndex);
+      setBoard(newBoard);
+      setIsGameStarted(true);
+      // handle first click
+      const updatedBoard = [...newBoard];
+      updatedBoard[rowIndex][cellIndex].revealed = true;
+      setBoard(updatedBoard);
+    }else{
+      const newBoard = [...board];
+      newBoard[rowIndex][cellIndex].revealed = true;
+      setBoard(newBoard);
+    }    
   }
+
+
 
   const handleNewGame = () => {
     setIsGameStarted(false);
@@ -79,6 +95,7 @@ function App() {
         onMouseDown={handleMouseDown} 
         onMouseUp={handleMouseUp} 
         onClickCell={ () => handleClickCell(cellIndex, rowIndex) }
+        revealed={cell.revealed}
       />
     })
   }) 
