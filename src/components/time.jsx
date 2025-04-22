@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function Time({ isGameStarted, isGameOver }) {
-    const [seconds, setSeconds] = useState(0); // Initialize seconds to 0
+    const [seconds, setSeconds] = useState(0); // Initialize seconds to 1
     
     useEffect(() => {
         // reset the timer when the game is reset
@@ -14,6 +14,7 @@ export default function Time({ isGameStarted, isGameOver }) {
           return () => {};
         }
         // Start the timer when the game starts
+        setSeconds(1) // set timer 1 when user start game
         const intervalId = setInterval(() => {
           setSeconds(seconds => seconds + 1); 
         }, 1000)
@@ -23,7 +24,7 @@ export default function Time({ isGameStarted, isGameOver }) {
      
     return (
         <div className="time-game d-flex justify-content-center align-items-center text-danger">
-            {seconds.toString().padStart(3, '0')}
+            {seconds.toString().padStart(3, '0') }
         </div>
     );
 }

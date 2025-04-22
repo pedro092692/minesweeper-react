@@ -7,7 +7,7 @@ import { useState } from 'react';
 
   
 function App() {
-  //define components values and props
+  //define game setup
   const ROWS = 5;
   const COLUMNS = 5;
   const NUM_MINES = 5;
@@ -16,7 +16,7 @@ function App() {
 
   // initialize board values
   const initialBoard = (cellIndex, rowIndex) => {
-    const newBoard = Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(" "));
+    const newBoard = Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings}));
     let minesPlaced = 0;
     while (minesPlaced < NUM_MINES) {
       const row = Math.floor(Math.random() * ROWS);
@@ -153,16 +153,24 @@ function App() {
       </div>
       
       <div className="game-score  d-flex align-items-center justify-content-between  px-2">
+        
         <div className="score-game d-flex justify-content-center align-items-center text-danger">
+          {/* render remaining mines */}
           {mines.toString().padStart(3, '0')}
         </div>
+
         <div className="tile d-flex justify-content-center align-items-center fs-4">
+          {/* newgame component */}
           <NewGame icon={icon} newGame={ handleNewGame }/>
         </div>
+        
+        {/* time component */}
         <Time isGameStarted={ isGameStarted } isGameOver={isGameOver} />
+      
       </div>
 
       <div className="board-game">
+        {/* render cells */}
         {cells}
       </div>
     </div>
