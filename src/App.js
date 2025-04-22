@@ -48,11 +48,10 @@ function App() {
     })
   }) 
 
-  //handle start game button
-  // const startGame = () => {
-  //   //define components values 
-  //   setValuesMap(Array(25).fill(" "));
-  // };
+  const handleNewGame = () => {
+    setBoard(initialBoard);
+  }
+
 
   // const showValue = (index) => {
   //   const newValuesMap = [...valuesMap];
@@ -72,7 +71,7 @@ function App() {
           000
         </div>
         <div className="tile d-flex justify-content-center align-items-center fs-4">
-          <NewGame icon={icon}/>
+          <NewGame icon={icon} newGame={ handleNewGame }/>
         </div>
         <Time />
       </div>
