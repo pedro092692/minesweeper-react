@@ -10,8 +10,8 @@ function App() {
   //define components values and props
   const ROWS = 5;
   const COLUMNS = 5;
-  const NUM_MINES = 3;
-  const settings = { value: " ", revealed: false, flagged: false, hasMine: false };
+  const NUM_MINES = 5;
+  const settings = { value: " ", revealed: false, flagged: false, hasMine: false, adyacentMines: 0 };
   
 
   // initialize board values
@@ -22,7 +22,7 @@ function App() {
       const row = Math.floor(Math.random() * ROWS);
       const col = Math.floor(Math.random() * COLUMNS);
       if (!newBoard[row][col].hasMine && row !== rowIndex && col !== cellIndex) {
-        newBoard[row][col] = { ...settings, hasMine: true, value: "💣" };
+        newBoard[row][col] = { ...settings, hasMine: true };
         minesPlaced++;
       }
     }
@@ -39,7 +39,7 @@ function App() {
               }
             }
           }
-          newBoard[row][col] = { ...settings, value: mineCount > 0 && mineCount, revealed: mineCount > 0 && true};
+          newBoard[row][col] = { ...settings, adyacentMines: mineCount };
         }
       }
     }
@@ -50,6 +50,7 @@ function App() {
   const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
   const [icon, setIcon] = useState("😊");
   const [isGameStarted, setIsGameStarted] = useState(false);
+  const [mines, setMines] = useState(NUM_MINES);
 
   const handleMouseDown = () => {
     setIcon("😱");
@@ -57,6 +58,24 @@ function App() {
 
   const handleMouseUp = () => {
     setIcon("😊");
+  }
+
+  const revealAdjacentCells = (rowIndex, cellIndex, board) => {
+    for (let r = rowIndex - 1; r <= rowIndex + 1; r++) {
+      for (let c = cellIndex - 1; c <= cellIndex + 1; c++) {
+        if (r >= 0 && r < ROWS && c >= 0 && c < COLUMNS) {
+          if (!board[r][c].revealed && !board[r][c].flagged && !board[r][c].hasMine) {
+              board[r][c].revealed = true;
+              if (board[r][c].adyacentMines > 0) {
+                board[r][c].value = board[r][c].adyacentMines;
+              }
+            if (board[r][c].value === " " && board[r][c].adyacentMines === 0) {
+              revealAdjacentCells(r, c, board);
+            }
+          }
+        }
+      }
+    }
   }
 
   const handleClickCell = (cellIndex, rowIndex) => {
@@ -72,10 +91,31 @@ function App() {
       // handle first click
       const updatedBoard = [...newBoard];
       updatedBoard[rowIndex][cellIndex].revealed = true;
+      revealAdjacentCells(rowIndex, cellIndex, updatedBoard);
+
+      // set the board with the updated values
       setBoard(updatedBoard);
     }else{
       const newBoard = [...board];
       newBoard[rowIndex][cellIndex].revealed = true;
+      // check if cell has mine
+      if (newBoard[rowIndex][cellIndex].hasMine) {
+        setIcon("😭");
+        alert("Game Over!");
+        setIsGameStarted(false);
+        // revealed all mines
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLUMNS; c++) {
+            if (newBoard[r][c].hasMine) {
+              newBoard[r][c].revealed = true;
+              newBoard[r][c].value = "💣";
+            }
+          }
+        }
+        setBoard(newBoard);
+        return;
+      }
+      revealAdjacentCells(rowIndex, cellIndex, newBoard);
       setBoard(newBoard);
     }    
   }
@@ -96,6 +136,7 @@ function App() {
         onMouseUp={handleMouseUp} 
         onClickCell={ () => handleClickCell(cellIndex, rowIndex) }
         revealed={cell.revealed}
+        hasMine={cell.hasMine}
       />
     })
   }) 
@@ -109,7 +150,7 @@ function App() {
       
       <div className="game-score  d-flex align-items-center justify-content-between  px-2">
         <div className="score-game d-flex justify-content-center align-items-center text-danger">
-          000
+          {mines.toString().padStart(3, '0')}
         </div>
         <div className="tile d-flex justify-content-center align-items-center fs-4">
           <NewGame icon={icon} newGame={ handleNewGame }/>

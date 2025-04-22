@@ -51,7 +51,12 @@ body {
 
 .revealed{
     background-color: #a1a0a0;
-    box-shadow: inset 12.62px 10.52px 8.42px 0px rgba(253,252,252,0.6), inset -10.52px -10.52px 8.42px 0px rgba(73, 73, 73, 0.55), inset -2px -2px 2px 0px rgba(255,255,255,0.25);
+    box-shadow: none;
+    border: 1px solid #afafaf;
+}
+
+.mine{
+    background-color: #f0c0c0;
 }
 
 .app .board-game{
