@@ -15,13 +15,13 @@ function App() {
   const NUM_MINES = 3;
   const settings = { value: " ", revealed: false, flagged: false, hasMine: false };
 
-  const initialBoard = () => {
+  const initialBoard = (cellIndex, rowIndex) => {
     const newBoard = Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings}));
     let minesPlaced = 0;
     while (minesPlaced < NUM_MINES) {
       const row = Math.floor(Math.random() * ROWS);
       const col = Math.floor(Math.random() * COLUMNS);
-      if (!newBoard[row][col].hasMine) {
+      if (!newBoard[row][col].hasMine && row !== cellIndex && col !== rowIndex) {
         newBoard[row][col] = { ...settings, hasMine: true, value: "💣" };
         minesPlaced++;
       }
@@ -59,9 +59,9 @@ function App() {
     setIcon("😊");
   }
 
-  const handleClickCell = () => {
+  const handleClickCell = (cellIndex, rowIndex) => {
     if (!isGameStarted) {
-      setBoard(initialBoard())
+      setBoard(initialBoard(rowIndex, cellIndex))
       setIsGameStarted(true);
     }
   }
@@ -78,7 +78,7 @@ function App() {
         value={cell.value} 
         onMouseDown={handleMouseDown} 
         onMouseUp={handleMouseUp} 
-        onClickCell={ handleClickCell }
+        onClickCell={ () => handleClickCell(cellIndex, rowIndex) }
       />
     })
   }) 
