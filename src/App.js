@@ -3,6 +3,10 @@ import './App.css';
 import Cell from './components/cell';
 import Time from './components/time';
 import NewGame from './components/newGame';
+import InitBoard from './utils/initialBoard';
+import revealMines from './utils/revealAllMines';
+import flaggedCell from './utils/flaggedCell';
+import revealAdjacent from './utils/revealAdjacentCells';
 import { useState } from 'react';
 
   
@@ -13,70 +17,28 @@ function App() {
   const NUM_MINES = 5;
   const settings = { value: " ", revealed: false, flagged: false, hasMine: false, adyacentMines: 0 };
   
-
-  // initialize board values
-  const initialBoard = (cellIndex, rowIndex) => {
-    const newBoard = Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings}));
-    let minesPlaced = 0;
-    while (minesPlaced < NUM_MINES) {
-      const row = Math.floor(Math.random() * ROWS);
-      const col = Math.floor(Math.random() * COLUMNS);
-      if (!newBoard[row][col].hasMine && row !== rowIndex && col !== cellIndex) {
-        newBoard[row][col] = { ...settings, hasMine: true };
-        minesPlaced++;
-      }
-    }
-
-    // calculate adjacent mines
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLUMNS; col++) {
-        if (!newBoard[row][col].hasMine) {
-          let mineCount = 0;
-          for (let r = row - 1; r <= row + 1; r++) {
-            for (let c = col - 1; c <= col + 1; c++) {
-              if (r >= 0 && r < ROWS && c >= 0 && c < COLUMNS && newBoard[r][c].hasMine) {
-                mineCount++;
-              }
-            }
-          }
-          newBoard[row][col] = { ...settings, adyacentMines: mineCount };
-        }
-      }
-    }
- 
-    return newBoard;
-  }
-  
+  // game hooks
   const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
   const [icon, setIcon] = useState("😊");
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [mines, setMines] = useState(NUM_MINES);
   const [isGameOver, setIsGameOver] = useState(false);
 
+  // handle mouse down event to change emoji icon to 😱
   const handleMouseDown = () => {
+    // ignore is game is over.
+    if (isGameOver) {
+      return;
+    }
     setIcon("😱");
   }
-
+  // handle mouse up event to change emoji incon to 😊
   const handleMouseUp = () => {
-    setIcon("😊");
-  }
-
-  const revealAdjacentCells = (rowIndex, cellIndex, board) => {
-    for (let r = rowIndex - 1; r <= rowIndex + 1; r++) {
-      for (let c = cellIndex - 1; c <= cellIndex + 1; c++) {
-        if (r >= 0 && r < ROWS && c >= 0 && c < COLUMNS) {
-          if (!board[r][c].revealed && !board[r][c].flagged && !board[r][c].hasMine) {
-              board[r][c].revealed = true;
-              if (board[r][c].adyacentMines > 0) {
-                board[r][c].value = board[r][c].adyacentMines;
-              }
-            if (board[r][c].value === " " && board[r][c].adyacentMines === 0) {
-              revealAdjacentCells(r, c, board);
-            }
-          }
-        }
-      }
+    // ignore is game is over.
+    if (isGameOver) {
+      return;
     }
+    setIcon("😊");
   }
 
   const handleClickCell = (cellIndex, rowIndex) => {
@@ -86,13 +48,14 @@ function App() {
     }
     // check if game is already started
     if (!isGameStarted) {
-      const newBoard = initialBoard(cellIndex, rowIndex);
-      setBoard(newBoard);
-      setIsGameStarted(true);
+      // first click on game (set new board ) avoid place mine on user selected cell.
+      const newBoard = startNewBoard(rowIndex, cellIndex, false)
       // handle first click
       const updatedBoard = [...newBoard];
       updatedBoard[rowIndex][cellIndex].revealed = true;
-      revealAdjacentCells(rowIndex, cellIndex, updatedBoard);
+      
+      // reveal Adjacent Cell
+      revealAdjacent(rowIndex, cellIndex, updatedBoard, ROWS, COLUMNS)
 
       // set the board with the updated values
       setBoard(updatedBoard);
@@ -103,33 +66,65 @@ function App() {
       if (newBoard[rowIndex][cellIndex].hasMine) {
         setIcon("😭");
         // revealed all mines
-        for (let r = 0; r < ROWS; r++) {
-          for (let c = 0; c < COLUMNS; c++) {
-            if (newBoard[r][c].hasMine) {
-              newBoard[r][c].revealed = true;
-              newBoard[r][c].value = "💣";
-            }
-          }
-        }
-        
+        const boardRevealed = revealMines(newBoard, ROWS, COLUMNS);
         setIsGameOver(true)
-        setBoard(newBoard);
+        setBoard(boardRevealed);
         return;
       }
-      revealAdjacentCells(rowIndex, cellIndex, newBoard);
+      // revealAdjacentCells(rowIndex, cellIndex, newBoard);
+      revealAdjacent(rowIndex, cellIndex, newBoard, ROWS, COLUMNS)
       setBoard(newBoard);
     }    
   }
 
-  const handleNewGame = () => {
-    if (isGameOver) {
-      setIcon("😊");
-      setIsGameStarted(false);
-      setIsGameOver(false);
-      setBoard(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
+  // flagged cell (right click)
+  const handleRightClickCell = (event, cellIndex, rowIndex) => {
+    event.preventDefault();
+    if (isGameOver || board[rowIndex][cellIndex].revealed) {
+      return;
     }
+    if (!isGameStarted) {
+      // set new board when first user click is flaggled a cell don't avoid selected cell been a mine.
+      const newBoard = startNewBoard(rowIndex, cellIndex, true);
+      // flagged selected cell
+      const updateBoard = [...newBoard];
+      const flaggedBoard = flaggedCell(updateBoard, rowIndex, cellIndex);
+      setBoard(flaggedBoard);
+      return;
+    }
+    const newBoard = [...board];
+    // flagged selected cell
+    const flaggedBoard = flaggedCell(newBoard, rowIndex, cellIndex);
+    
+    setBoard(flaggedBoard);
+    setMines((prevMines) => prevMines - 1);
   }
 
+  // set new game Board
+  function startNewBoard (row, col, flagged){
+    const newBoard = InitBoard(row, col, settings, ROWS, COLUMNS, NUM_MINES, flagged); // setup the board
+      setBoard(newBoard);
+      setIsGameStarted(true);
+      return newBoard;
+  }
+
+  // set new game
+  const handleNewGame = () => {
+    if (isGameOver) {
+      resetGame();
+    }
+  }
+  
+  // reset game
+  function resetGame(){
+    setIsGameOver(false);
+    setIsGameStarted(false);
+    setMines(5);
+    setIcon("😊");
+    setBoard(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
+  }
+
+  // save board cells in varible
   const cells = board.map((row, rowIndex) => {
     return row.map((cell, cellIndex) => {
       return <Cell 
@@ -139,11 +134,14 @@ function App() {
         onMouseDown={handleMouseDown} 
         onMouseUp={handleMouseUp} 
         onClickCell={ () => handleClickCell(cellIndex, rowIndex) }
+        onRightClick={ (event) => handleRightClickCell(event, cellIndex, rowIndex) }
         revealed={cell.revealed}
         hasMine={cell.hasMine}
       />
     })
   }) 
+
+ 
 
   return (
     <div className="app d-flex flex-column rounded-top align-items-center gap-4">

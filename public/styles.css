@@ -59,6 +59,11 @@ body {
     background-color: #a1a0a0;
 }
 
+.revealed:active{
+    background-color: #a1a0a0;
+    box-shadow: none;
+}
+
 .mine{
     background-color: #f0c0c0;
 }
