@@ -41,6 +41,7 @@ function App() {
     setIcon("😊");
   }
 
+  // handle cell click
   const handleClickCell = (cellIndex, rowIndex) => {
     // check if cell is already revealed or flagged
     if (board[rowIndex][cellIndex].revealed || board[rowIndex][cellIndex].flagged || isGameOver) {
@@ -50,7 +51,8 @@ function App() {
     if (!isGameStarted) {
       // first click on game (set new board ) avoid place mine on user selected cell.
       const newBoard = startNewBoard(rowIndex, cellIndex, false)
-      // handle first click
+      
+      // reveal user selected cell
       const updatedBoard = [...newBoard];
       updatedBoard[rowIndex][cellIndex].revealed = true;
       
@@ -60,7 +62,9 @@ function App() {
       // set the board with the updated values
       setBoard(updatedBoard);
     }else{
+      // if game already started reveal selected cell and check if is has a mine.
       const newBoard = [...board];
+      // reveal user selected cell
       newBoard[rowIndex][cellIndex].revealed = true;
       // check if cell has mine
       if (newBoard[rowIndex][cellIndex].hasMine) {
@@ -71,7 +75,7 @@ function App() {
         setBoard(boardRevealed);
         return;
       }
-      // revealAdjacentCells(rowIndex, cellIndex, newBoard);
+      // reveal Adjacent Cells
       revealAdjacent(rowIndex, cellIndex, newBoard, ROWS, COLUMNS)
       setBoard(newBoard);
     }    
@@ -83,6 +87,7 @@ function App() {
     if (isGameOver || board[rowIndex][cellIndex].revealed) {
       return;
     }
+    // check if game is already started
     if (!isGameStarted) {
       // set new board when first user click is flaggled a cell don't avoid selected cell been a mine.
       const newBoard = startNewBoard(rowIndex, cellIndex, true);
@@ -90,14 +95,24 @@ function App() {
       const updateBoard = [...newBoard];
       const flaggedBoard = flaggedCell(updateBoard, rowIndex, cellIndex);
       setBoard(flaggedBoard);
+      // subtract mines count
+      setMines((prevMines) => prevMines - 1);
       return;
     }
     const newBoard = [...board];
+    // check if selected cell is already flagged 
+    if (newBoard[rowIndex][cellIndex].flagged) {
+        const flaggedBoard = flaggedCell(newBoard, rowIndex, cellIndex, false);
+        setBoard(flaggedBoard);
+        // add mines count
+        setMines((prevMines) => prevMines + 1);
+        return
+    }
     // flagged selected cell
     const flaggedBoard = flaggedCell(newBoard, rowIndex, cellIndex);
-    
-    setBoard(flaggedBoard);
+    // subtract mines count
     setMines((prevMines) => prevMines - 1);
+    setBoard(flaggedBoard);
   }
 
   // set new game Board
@@ -140,7 +155,6 @@ function App() {
       />
     })
   }) 
-
  
 
   return (
@@ -154,7 +168,7 @@ function App() {
         
         <div className="score-game d-flex justify-content-center align-items-center text-danger">
           {/* render remaining mines */}
-          {mines.toString().padStart(3, '0')}
+          {mines < 0 ? mines : mines.toString().padStart(3, '0')}
         </div>
 
         <div className="tile d-flex justify-content-center align-items-center fs-4">
