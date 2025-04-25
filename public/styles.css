@@ -32,12 +32,47 @@ body {
     font-size: 40px;
 }
 
-.tile{
-    height: 83px;
-    width: 83px;
+.icon{
     background-color: #D2D1D1;
     cursor: pointer;
-    box-shadow: inset 12.62px 10.52px 8.42px 0px rgba(253,252,252,0.6), inset -10.52px -10.52px 8.42px 0px rgba(0,0,0,0.55);;
+    border-radius: 4px;
+    padding: 7px;
+    box-shadow: inset 2.62px 2.52px 3.42px 0px rgba(253,252,252,0.6), inset -3.52px -3.52px 3.42px 0px rgba(0,0,0,0.55);
+}
+
+.tile{
+    background-color: #D2D1D1;
+    cursor: pointer;
+}
+
+.big{
+    width: 83px;
+    height: 83px;
+    box-shadow: inset 12.62px 10.52px 8.42px 0px rgba(253,252,252,0.6), inset -10.52px -10.52px 8.42px 0px rgba(0,0,0,0.55);
+}
+
+.big:active{
+    box-shadow: inset 12.62px 10.52px 8.42px 0px rgba(253,252,252,0.6), inset -10.52px -10.52px 8.42px 0px rgba(73, 73, 73, 0.55), inset -2px -2px 2px 0px rgba(255,255,255,0.25);
+}
+
+.normal{
+    width: 46px;
+    height: 46px;
+    box-shadow: inset 3.62px 3.52px 3.42px 0px rgba(253,252,252,0.6), inset -3.52px -3.52px 3.42px 0px rgba(0,0,0,0.55);
+}
+
+.normal:active{
+    box-shadow: inset 3.62px 3.52px 3.42px 0px rgba(253,252,252,0.6), inset -3.52px -3.52px 3.42px 0px rgba(73, 73, 73, 0.55), inset -2px -2px 2px 0px rgba(255,255,255,0.25);
+}
+
+.tiny{
+    width: 25px;
+    height: 25px;
+    box-shadow: inset 1.62px 1.52px 1.42px 0px rgba(253,252,252,0.6), inset -1.52px -1.52px 1.42px 0px rgba(0,0,0,0.55);
+}
+
+.tiny:active{
+    box-shadow: inset 1.62px 1.52px 1.42px 0px rgba(253,252,252,0.6), inset -1.52px -1.52px 4.42px 0px rgba(73, 73, 73, 0.55), inset -1px -1px 1px 0px rgba(255,255,255,0.25);
 }
 
 .tile:hover{
@@ -46,7 +81,6 @@ body {
 
 .tile:active{
     background-color: #a1a0a0;
-    box-shadow: inset 12.62px 10.52px 8.42px 0px rgba(253,252,252,0.6), inset -10.52px -10.52px 8.42px 0px rgba(73, 73, 73, 0.55), inset -2px -2px 2px 0px rgba(255,255,255,0.25);
 }
 
 .revealed{
@@ -75,7 +109,6 @@ body {
 .app .board-game{
     width: 90%;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
 }
 
 
@@ -153,9 +186,19 @@ body {
         height: 420px;
     }
 
-    .tile{
-        height: 43px;
-        width: 43px;
+    .big{
+        height: 46px;
+        width: 46px;
+    }
+
+    .normal{
+        height: 23px;
+        width: 23px;
+    }
+
+    .tiny{
+        height: 14px;
+        width: 14px;
     }
     
 }

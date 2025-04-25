@@ -7,22 +7,50 @@ import InitBoard from './utils/initialBoard';
 import revealMines from './utils/revealAllMines';
 import flaggedCell from './utils/flaggedCell';
 import revealAdjacent from './utils/revealAdjacentCells';
+import countRevealed from './utils/countRevealedCell';
 import { useState } from 'react';
 
   
 function App() {
   //define game setup
+  function selectDifficulty(difficulty) {
+    const level = {
+      easy:{
+        rows: 5,
+        columns: 5,
+        nun_mines: 5,
+        tile_size: 'big',
+      },
+      normal:{
+        rows: 9,
+        columns: 9,
+        nun_mines: 10,
+        tile_size: 'normal',
+      },
+      hard:{
+        rows: 16,
+        columns: 16,
+        nun_mines: 40,
+        tile_size: 'tiny',
+      }
+    }
+    return level[difficulty]
+  }
+  
+  let difficulty = selectDifficulty('normal');
+
   const ROWS = 5;
   const COLUMNS = 5;
   const NUM_MINES = 5;
   const settings = { value: " ", revealed: false, flagged: false, hasMine: false, adyacentMines: 0 };
   
   // game hooks
-  const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
+  const [board, setBoard] = useState(Array(difficulty.rows).fill(null).map(() => Array(difficulty.columns).fill({...settings})));
   const [icon, setIcon] = useState("😊");
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const [mines, setMines] = useState(NUM_MINES);
+  const [mines, setMines] = useState(difficulty.nun_mines);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [rightFlags, setRigtFlags] = useState(difficulty.nun_mines);
 
   // handle mouse down event to change emoji icon to 😱
   const handleMouseDown = () => {
@@ -57,7 +85,7 @@ function App() {
       updatedBoard[rowIndex][cellIndex].revealed = true;
       
       // reveal Adjacent Cell
-      revealAdjacent(rowIndex, cellIndex, updatedBoard, ROWS, COLUMNS)
+      revealAdjacent(rowIndex, cellIndex, updatedBoard, difficulty.rows, difficulty.columns)
 
       // set the board with the updated values
       setBoard(updatedBoard);
@@ -70,14 +98,16 @@ function App() {
       if (newBoard[rowIndex][cellIndex].hasMine) {
         setIcon("😭");
         // revealed all mines
-        const boardRevealed = revealMines(newBoard, ROWS, COLUMNS);
+        const boardRevealed = revealMines(newBoard, difficulty.rows, difficulty.columns);
         setIsGameOver(true)
         setBoard(boardRevealed);
         return;
       }
       // reveal Adjacent Cells
-      revealAdjacent(rowIndex, cellIndex, newBoard, ROWS, COLUMNS)
+      revealAdjacent(rowIndex, cellIndex, newBoard, difficulty.rows, difficulty.columns)
       setBoard(newBoard);
+      // check if user wins game.
+      isGameWin(newBoard);
     }    
   }
 
@@ -94,55 +124,96 @@ function App() {
       // flagged selected cell
       const updateBoard = [...newBoard];
       const flaggedBoard = flaggedCell(updateBoard, rowIndex, cellIndex);
+      // render board
       setBoard(flaggedBoard);
       // subtract mines count
       setMines((prevMines) => prevMines - 1);
+      // check if cell flagged has a mine 
+      checkFlaggedCell(flaggedBoard, rowIndex, cellIndex, true);
       return;
     }
     const newBoard = [...board];
     // check if selected cell is already flagged 
     if (newBoard[rowIndex][cellIndex].flagged) {
+        // unflag cell
         const flaggedBoard = flaggedCell(newBoard, rowIndex, cellIndex, false);
+        //redner board
         setBoard(flaggedBoard);
         // add mines count
         setMines((prevMines) => prevMines + 1);
+        // check if cell flagged has a mine 
+        checkFlaggedCell(flaggedBoard, rowIndex, cellIndex, false);
         return
     }
     // flagged selected cell
     const flaggedBoard = flaggedCell(newBoard, rowIndex, cellIndex);
     // subtract mines count
     setMines((prevMines) => prevMines - 1);
+    // check if cell flagged has a mine 
+    checkFlaggedCell(flaggedBoard, rowIndex, cellIndex, true);
+    //render board
     setBoard(flaggedBoard);
+    // check if user wins the game.
+    isGameWin(flaggedBoard, true);
   }
 
-  // set new game Board
+  // check flagged cell function
+  function checkFlaggedCell(board, row, col, flag) {
+    if (board[row][col].hasMine && flag){
+        setRigtFlags((prevRigthFlags) => prevRigthFlags - 1 );
+    }else if(board[row][col].hasMine && !flag){
+        setRigtFlags((prevRigthFlags) => prevRigthFlags + 1 );
+      }
+  }
+
+  // set new game Board function
   function startNewBoard (row, col, flagged){
-    const newBoard = InitBoard(row, col, settings, ROWS, COLUMNS, NUM_MINES, flagged); // setup the board
+    const newBoard = InitBoard(row, col, settings, difficulty.rows, difficulty.columns, difficulty.nun_mines, flagged); // setup the board
       setBoard(newBoard);
       setIsGameStarted(true);
       return newBoard;
   }
 
-  // set new game
+  // set new game function
   const handleNewGame = () => {
     if (isGameOver) {
       resetGame();
     }
   }
   
-  // reset game
+  // reset game function
   function resetGame(){
     setIsGameOver(false);
     setIsGameStarted(false);
     setMines(5);
     setIcon("😊");
+    setRigtFlags(NUM_MINES);
     setBoard(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
+  }
+
+  // is game win function
+  function isGameWin(board, flag=false){
+    if (!flag){
+      if(countRevealed(board, ROWS, COLUMNS) === ( (ROWS * COLUMNS) - NUM_MINES) && rightFlags === 0 ){
+        setIcon("😎");
+        setIsGameOver(true);
+        alert('You win the game.');
+      }
+    }
+    if (flag){
+      if(countRevealed(board, ROWS, COLUMNS) === ( (ROWS * COLUMNS) - NUM_MINES) && rightFlags === 1 ){
+        setIcon("😎");
+        setIsGameOver(true);
+        alert('You win the game.');
+      }
+    }
   }
 
   // save board cells in varible
   const cells = board.map((row, rowIndex) => {
     return row.map((cell, cellIndex) => {
       return <Cell 
+        size={difficulty.tile_size}
         key={`${rowIndex}-${cellIndex}`} 
         id={`${rowIndex}-${cellIndex}`} 
         value={cell.value} 
@@ -171,7 +242,7 @@ function App() {
           {mines < 0 ? mines : mines.toString().padStart(3, '0')}
         </div>
 
-        <div className="tile d-flex justify-content-center align-items-center fs-4">
+        <div className="icon d-flex justify-content-center align-items-center fs-4">
           {/* newgame component */}
           <NewGame icon={icon} newGame={ handleNewGame }/>
         </div>
@@ -181,7 +252,7 @@ function App() {
       
       </div>
 
-      <div className="board-game">
+      <div className="board-game" style={{gridTemplateRows: `repeat(${difficulty.rows}, 1fr)`, gridTemplateColumns: `repeat(${difficulty.columns}, 1fr)`}}>
         {/* render cells */}
         {cells}
       </div>
