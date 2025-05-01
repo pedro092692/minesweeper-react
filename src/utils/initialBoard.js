@@ -6,12 +6,12 @@ function initialBoard(rowIndex, cellIndex, settings, rows, cols, n_mines, flagge
       const col = Math.floor(Math.random() * cols);
       if (!flagged){
         if (!newBoard[row][col].hasMine && row !== rowIndex && col !== cellIndex) {
-            newBoard[row][col] = { ...settings, hasMine: true, value: "💣" };
+            newBoard[row][col] = { ...settings, hasMine: true, };
             minesPlaced++;
           }
       }else{
         if (!newBoard[row][col].hasMine) {
-            newBoard[row][col] = { ...settings, hasMine: true, value: "💣" };
+            newBoard[row][col] = { ...settings, hasMine: true, };
             minesPlaced++;
           }
       }

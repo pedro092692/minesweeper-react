@@ -13,7 +13,15 @@ import { useState } from 'react';
   
 function App() {
   //define game setup
-  function selectDifficulty(difficulty) {
+  function selectDifficulty() {
+    let difficulty;
+    
+    difficulty = localStorage.getItem('level');
+    
+    if(difficulty === null) {
+      difficulty = 'normal';
+    }
+  
     const level = {
       easy:{
         rows: 5,
@@ -37,11 +45,18 @@ function App() {
     return level[difficulty]
   }
   
-  let difficulty = selectDifficulty('normal');
 
-  const ROWS = 5;
-  const COLUMNS = 5;
-  const NUM_MINES = 5;
+  // set difficulty
+  let difficulty = selectDifficulty();
+
+  // handle set difficulty 
+  function setDifficulty(level) {
+    localStorage.setItem('level', level);
+    difficulty = selectDifficulty();
+    resetGame(difficulty);
+    
+  }
+
   const settings = { value: " ", revealed: false, flagged: false, hasMine: false, adyacentMines: 0 };
   
   // game hooks
@@ -177,31 +192,31 @@ function App() {
   // set new game function
   const handleNewGame = () => {
     if (isGameOver) {
-      resetGame();
+      resetGame(difficulty);
     }
   }
   
   // reset game function
-  function resetGame(){
+  function resetGame(difficulty){
     setIsGameOver(false);
     setIsGameStarted(false);
-    setMines(5);
+    setMines(difficulty.nun_mines);
     setIcon("😊");
-    setRigtFlags(NUM_MINES);
-    setBoard(Array(ROWS).fill(null).map(() => Array(COLUMNS).fill({...settings})));
+    setRigtFlags(difficulty.nun_mines);
+    setBoard(Array(difficulty.rows).fill(null).map(() => Array(difficulty.columns).fill({...settings})));
   }
 
   // is game win function
   function isGameWin(board, flag=false){
     if (!flag){
-      if(countRevealed(board, ROWS, COLUMNS) === ( (ROWS * COLUMNS) - NUM_MINES) && rightFlags === 0 ){
+      if(countRevealed(board, difficulty.rows, difficulty.columns) === ( (difficulty.rows * difficulty.columns) - difficulty.nun_mines) && rightFlags === 0 ){
         setIcon("😎");
         setIsGameOver(true);
         alert('You win the game.');
       }
     }
     if (flag){
-      if(countRevealed(board, ROWS, COLUMNS) === ( (ROWS * COLUMNS) - NUM_MINES) && rightFlags === 1 ){
+      if(countRevealed(board, difficulty.rows, difficulty.columns) === ( (difficulty.rows * difficulty.columns) - difficulty.nun_mines) && rightFlags === 1 ){
         setIcon("😎");
         setIsGameOver(true);
         alert('You win the game.');
@@ -229,13 +244,19 @@ function App() {
  
 
   return (
-    <div className="app d-flex flex-column rounded-top align-items-center gap-4">
+    <div className="app d-flex flex-column rounded-top align-items-center">
       <div className="bar rounded-top px-2 d-flex align-items-center gap-1 w-100">
         <img src="./images/mine.png" alt="minesweeper logo" />
         <span className="mb-1">Buscaminas</span>
       </div>
+
+      <div className="px-2 d-flex align-items-center gap-2 w-100">
+        <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('easy')}>Facil</span>
+        <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('normal')}>Normal</span>
+        <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('hard')}>Dificil</span>
+      </div>
       
-      <div className="game-score  d-flex align-items-center justify-content-between  px-2">
+      <div className="game-score  d-flex align-items-center justify-content-between px-2 mt-2">
         
         <div className="score-game d-flex justify-content-center align-items-center text-danger">
           {/* render remaining mines */}
