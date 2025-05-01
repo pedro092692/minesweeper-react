@@ -23,9 +23,8 @@ export default function Time({ isGameStarted, isGameOver }) {
 
      
     return (
-        <div className="time-game d-flex justify-content-center align-items-center text-danger">
+        <div className="time-game d-flex justify-content-center align-items-center text-danger" id="time">
             {seconds.toString().padStart(3, '0') }
         </div>
     );
 }
-

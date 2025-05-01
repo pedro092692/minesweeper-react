@@ -212,6 +212,7 @@ function App() {
       if(countRevealed(board, difficulty.rows, difficulty.columns) === ( (difficulty.rows * difficulty.columns) - difficulty.nun_mines) && rightFlags === 0 ){
         setIcon("😎");
         setIsGameOver(true);
+        saveScore();
         alert('You win the game.');
       }
     }
@@ -219,9 +220,37 @@ function App() {
       if(countRevealed(board, difficulty.rows, difficulty.columns) === ( (difficulty.rows * difficulty.columns) - difficulty.nun_mines) && rightFlags === 1 ){
         setIcon("😎");
         setIsGameOver(true);
+        saveScore();
         alert('You win the game.');
       }
     }
+  }
+
+  // save high score function 
+  function saveScore(){
+    const level = localStorage.getItem('level');
+    const time = parseInt(document.getElementById('time').innerText);
+    const highScore = localStorage.getItem(`highScore_${level}`);
+    if (highScore === null) {
+      localStorage.setItem(`highScore_${level}`, `Difficulty: ${level}, Time: ${time}s`)
+    }else{
+      const currentTime = parseInt(highScore.split(':')[2].trim());
+      if (time < currentTime) {
+        // set new hitgh score
+        localStorage.setItem(`highScore_${level}`, `Difficulty: ${level}, Time: ${time}s`)
+      }
+    }
+  
+
+  }
+
+  const viewHighScore = ()  => {
+    const level = localStorage.getItem('level');
+    let score = localStorage.getItem(`highScore_${level}`);
+    if(score === null) {
+      score = `Difficulty: ${level}, Time: Level Not Completed`
+    }
+    alert(score)
   }
 
   // save board cells in varible
@@ -250,10 +279,15 @@ function App() {
         <span className="mb-1">Buscaminas</span>
       </div>
 
-      <div className="px-2 d-flex align-items-center gap-2 w-100">
-        <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('easy')}>Facil</span>
-        <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('normal')}>Normal</span>
-        <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('hard')}>Dificil</span>
+      <div className="px-2 d-flex justify-content-between w-100">
+        <div className=' d-flex align-items-center gap-2'>
+          <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('easy')}>Facil</span>
+          <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('normal')}>Normal</span>
+          <span className="mb-1 text-dark" role="button" onClick={ () => setDifficulty('hard')}>Dificil</span>
+        </div>
+        <div>
+          <span className="mb-1 text-dark" role="button" onClick={viewHighScore}>High Score</span>
+        </div>
       </div>
       
       <div className="game-score  d-flex align-items-center justify-content-between px-2 mt-2">
